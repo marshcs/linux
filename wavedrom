@@ -1,0 +1,39 @@
+{signal: [
+  
+  ['clk',
+   {name: 'clk',   wave: 'p......................................................'},
+   {name: 'dbg数据源: conv_dbg', 		wave: '22222222222222222222222222222222222222222222222222222222', data: '0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f'   },
+   {name: 'dbg_update(3dly)', 	wave: '0..1.......0......................1.......0............', data: 'Q2',period:1},
+   {name: 'conv_dbg_hold', wave: 'xxx222222222.......................22222222.............', data: '2 3 4 5 6 7 8 9 a     2 3 4 5 6 7 8 9 ' ,node: '...........i.......................k' },
+
+
+    ],
+  {},
+  ['pclk',
+   {period:8,name: 'pclk',   		wave: 'p..Pp..',node: '...j........'},
+   {period:8,name: 'dbg_update_apb',wave: '10..10.', data: 'Q2'},
+   {period:8,name: 'dbg_write_apb', wave: '0.10..1', data: 'Q2'},
+   {name: 'conv_dbg_register_q(ids)',   	
+    								wave: 'x..2...',period:8,data:'a 9  '},
+   {period:8,name: 'dbg_count',   	wave: '3242324',data:'0(update) 1 2(write) 3 0(update) 1 2(write) 3 '},
+
+
+
+  ]
+],
+   edge: [
+    'i~j 采样前稳定至少pclk一个周期',
+    'j~k 采样后稳定至少pclk一个周期',
+
+  ],
+    config: { hscale: 1 }
+}
+
+1、pclk时钟域产生周期性的debug寄存器“更新”和“写入ids”的脉冲信号,相位相反：dbg_update_apb, dbg_write_apb;
+2、dbg_update_apb使用同步器打3拍同步到clk时钟域：dbg_update；
+3、dbg_update控制debug信号源(例如conv_dbg），采样到寄存器并保持：conv_dbg_hold;
+4、conv_dbg_hold 以dbg_write_apb为使能信号，写入ids寄存器（conv_dbg_register_q）。
+5、上述采样可以保证源寄存器（conv_dbg_hold）在采样前后，都至少稳定一个pclk的时钟周期。可以设置为多周期路径；
+
+
+
